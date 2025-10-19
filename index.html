@@ -73,7 +73,73 @@
     </div>
 
     <script>
-        function generateCourse() {
+        function async function generateCourse() {
+    const topic = document.getElementById('topicInput').value;
+    const style = document.getElementById('styleSelect').value;
+    const generateBtn = document.getElementById('generateBtn');
+    const resultDiv = document.getElementById('resultDiv');
+
+    if (!topic) {
+        alert('Моля въведи тема за курса!');
+        return;
+    }
+
+    // Показваме зареждане
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Генериране...';
+    resultDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/generate-course', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ topic, style }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            resultDiv.textContent = data.course;
+            resultDiv.style.display = 'block';
+        } else {
+            alert('Грешка: ' + data.error);
+            // Връщаме се към демо версията при грешка
+            showDemoCourse(topic, style);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Възникна мрежова грешка. Показвам демо версия.');
+        showDemoCourse(topic, style);
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Създай курс';
+    }
+}
+
+function showDemoCourse(topic, style) {
+    const resultDiv = document.getElementById('resultDiv');
+    const demoCourse = `
+🎯 КУРС: ${topic}
+📚 СТИЛ: ${style}
+
+ЗАГЛАВИЕ: "Въведение в ${topic}"
+ОПИСАНИЕ: AI функцията временно не е налична. Това е демо съдържание.
+
+МОДУЛ 1: ОСНОВИ
+• Урок 1: Какво е ${topic}
+• Урок 2: Ключови принципи
+
+МОДУЛ 2: ПРАКТИКА
+• Урок 1: Реални приложения
+• Урок 2: Упражнения
+
+🔧 OpenAI интеграцията се настройва...
+`;
+    resultDiv.textContent = demoCourse;
+    resultDiv.style.display = 'block';
+}() {
             const topic = document.getElementById('topicInput').value;
             const style = document.getElementById('styleSelect').value;
             const resultDiv = document.getElementById('resultDiv');
@@ -109,4 +175,5 @@
     </script>
 </body>
 </html>
+
 
